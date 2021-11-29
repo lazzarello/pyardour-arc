@@ -5,6 +5,7 @@
 # SSID is an integer starting at 1 from the order in the Strips list
 import asyncio
 import monome
+import aiosc
 
 ARDOUR_PORT = 3819
 ARDOUR_HOST = 'localhost'
@@ -12,8 +13,9 @@ ARDOUR_FEEDBACK_PORT = 3820
 ARDOUR_FADER_MIN_DB = -193
 ARDOUR_FADER_MAX_DB = 6
 
-class Ardour:
+class Ardour(aiosc.OSCProtocol):
     def __init__(self, host: str, port: int, fb_port: int):
+        super().__init__()
         self._host = host
         self._port = port
         self._conn = None
@@ -21,7 +23,7 @@ class Ardour:
 
     def on_db_delta(self, strip: int, db: float):
         # ardour strips are 1 indexed, arc is 0
-        strip =+ 1
+        strip += 1
         # generate this message string
         osc_message = f'/strip/db_delta i {strip} f {db}'
         print(osc_message)
@@ -30,7 +32,9 @@ class ArdourArcApp(monome.ArcApp):
     def __init__(self):
         super().__init__()
         self.pos = [0, 0, 0, 0]
-        self.ardour = Ardour(ARDOUR_HOST, ARDOUR_PORT, ARDOUR_FEEDBACK_PORT)
+        self.ardour = Ardour(ARDOUR_HOST,
+                             ARDOUR_PORT,
+                             ARDOUR_FEEDBACK_PORT)
 
     def on_arc_ready(self):
         print('Ready, clearing all rings...')
