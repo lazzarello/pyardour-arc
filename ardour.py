@@ -24,7 +24,6 @@ class Ardour(aiosc.OSCProtocol):
     def on_db_delta(self, strip: int, db: float):
         # ardour strips are 1 indexed, arc is 0
         strip += 1
-        # generate this message string
         osc_message = f'/strip/db_delta i {strip} f {db}'
         print(osc_message)
 
